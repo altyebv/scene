@@ -1,0 +1,29 @@
+body {
+    margin: 0;
+}
+
+/* Blurry gradient background (ChatScreen uses .chat-blur-bg) */
+.chat-blur-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(at 30% 20%, rgba(0, 255, 200, 0.25), transparent 50%),
+              radial-gradient(at 70% 80%, rgba(0, 180, 100, 0.25), transparent 50%),
+              radial-gradient(at 50% 50%, rgba(150, 0, 200, 0.15), transparent 60%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+
+/* tiny blinking cursor style */
+.typing-cursor {
+    display: inline-block;
+    opacity: 1;
+    animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+    to {
+        opacity: 0;
+    }
+}
