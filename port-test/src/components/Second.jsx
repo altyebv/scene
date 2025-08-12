@@ -29,7 +29,7 @@ function Box() {
 
 function Model() {
     const [error, setError] = useState(null);
-    const { scene } = useGLTF('/models/test.glb');
+    const { scene } = useGLTF('/models/desk.glb');
     
     useEffect(() => {
         // Configure Draco decoder
@@ -89,8 +89,8 @@ function Second() {
         <div className='bg-gray-400' style={{ width: '100vw', height: '100vh' }}>
 
             <Canvas camera={{ position: [4, 5, 4], fov: 60 }}>
-                <directionalLight position={[2, 5, 1]} intensity={0.5} />
-                <ambientLight intensity={0.5} />
+                <directionalLight position={[2, 5, 1]} intensity={2} />
+                <ambientLight intensity={1} />
                 <Suspense fallback={
                     <mesh>
                         <boxGeometry args={[1, 1, 1]} />
