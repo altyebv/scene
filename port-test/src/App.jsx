@@ -1,15 +1,16 @@
 
 import './App.css'
 // import ChatGPTClone from './components/ChatScreen';
-import ChatGPTClone from './components/Screen2';
 
 import Scene from './components/Scene';
-import Second from './components/Second';
+import Laptop from './components/Laptop';
+import Desktop from './components/desktop';
 
 function App() {
-  return <Second />;
-  // return <ChatGPTClone />;
-  // return <ChatGPTClone />;
+  // return <Second />;
+  // return <Desktop />;
+  return <Laptop />;
+
 }
 
 export default App;
