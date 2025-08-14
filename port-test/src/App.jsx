@@ -1,12 +1,12 @@
 
 import './App.css'
 
-import Scene from './components/Scene';
-import Laptop from './components/Laptop';
+// import Scene from './components/Scene';
+// import Laptop from './components/Laptop';
+import Desktop from './components/desktop';
 
 function App() {
-  // return <Second />;
-  return <Laptop />;
+  return <Desktop />;
 
 }
 
