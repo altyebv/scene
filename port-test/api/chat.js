@@ -190,6 +190,17 @@ export default async function handler(req, res) {
         userAgent: req.headers['user-agent']?.substring(0, 50) + '...',
     });
 
+    // Test endpoint for GET requests (browser visits)
+    if (req.method === 'GET') {
+        console.log("✅ GET request received - API is working!");
+        return res.status(200).json({
+            message: "Altyeb's Portfolio ChatBot API is working!",
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV,
+            status: "online"
+        });
+    }
+
     if (req.method !== "POST") {
         console.warn("⚠️ Method not allowed:", req.method);
         return res.status(405).json({ error: "Method not allowed" });
@@ -200,7 +211,7 @@ export default async function handler(req, res) {
         console.log("💬 Processing message:", message?.substring(0, 100) + '...');
 
         if (!message?.trim()) {
-            console.error("❌ Empty or missing message");
+            console.error(" Empty or missing message");
             return res.status(400).json({ error: "Message is required" });
         }
 
@@ -260,7 +271,7 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
         }
 
         const data = await aiResponse.json();
-        console.log(" Groq API success");
+        console.log("✅ Groq API success");
 
         const reply = data.choices?.[0]?.message?.content?.trim() ||
             "Hmm, seems like I'm having a quiet moment here in my virtual space. Could you try asking me something about Altyeb? I'd love to chat!";
@@ -275,7 +286,7 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
         });
 
     } catch (error) {
-        console.error("💥 Serverless function error:", error.message);
+        console.error(" Serverless function error:", error.message);
 
         // Friendly error response that maintains character
         const errorResponse = "Oops! Something went a bit haywire in my digital brain 🤖 *taps virtual screen* Could you try asking me again? I promise I'm usually much more helpful when discussing Altyeb's impressive work!";
@@ -285,5 +296,5 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
             error: true,
             timestamp: new Date().toISOString()
         });
-    }   
+    }
 }
