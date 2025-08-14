@@ -53,7 +53,7 @@ const sendMessage = async () => {
         const data = await res.json();
 
         const botMsg = {
-            text: data.reply || "(No response from AI)",
+            text: data.reply || "(No response from AI / )",
             sender: "bot",
             timestamp: Date.now(),
             id: Date.now() + 1
