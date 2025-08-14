@@ -6,14 +6,13 @@ export default function ChatBot() {
     const [input, setInput] = useState("");
     const [isThinking, setIsThinking] = useState(false);
     const [started, setStarted] = useState(false);
-    const [conversationHistory, setConversationHistory] = useState([]);
     const [typingMessageId, setTypingMessageId] = useState(null);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
 
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({
+            messagesEndRef.current.scrollIntoView({ 
                 behavior: "smooth",
                 block: "end"
             });
@@ -27,11 +26,11 @@ export default function ChatBot() {
 
         useEffect(() => {
             if (!text) return;
-
+            
             setIsTyping(true);
             setDisplayText("");
             let i = 0;
-
+            
             const timer = setInterval(() => {
                 if (i < text.length) {
                     setDisplayText(text.slice(0, i + 1));
@@ -51,7 +50,7 @@ export default function ChatBot() {
     // Typing Message Component
     const TypingMessage = ({ message }) => {
         const { displayText, isTyping } = useTypewriter(message.text, 25);
-
+        
         useEffect(() => {
             if (!isTyping && message.id === typingMessageId) {
                 setTypingMessageId(null);
@@ -77,9 +76,9 @@ export default function ChatBot() {
                         )}
                     </div>
                     <span className="text-xs text-slate-500 mt-1 px-1">
-                        {new Date(message.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
+                        {new Date(message.timestamp).toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
                         })}
                     </span>
                 </div>
@@ -92,34 +91,28 @@ export default function ChatBot() {
 
         if (!started) setStarted(true);
 
-        const userMsg = {
-            text: input.trim(),
-            sender: "user",
+        const userMsg = { 
+            text: input.trim(), 
+            sender: "user", 
             timestamp: Date.now(),
             id: Date.now()
         };
-
+        
         setMessages((prev) => [...prev, userMsg]);
-
-        // Add to conversation history for context
-        const newHistoryEntry = { role: "user", content: userMsg.text };
-        const updatedHistory = [...conversationHistory, newHistoryEntry];
-        setConversationHistory(updatedHistory);
-
-        setInput("");
+        const currentInput = input.trim();
+        setInput(""); // Clear input immediately after capturing the value
         setIsThinking(true);
 
         try {
-            console.log("🚀 Sending to API:", userMsg.text);
-
+            console.log("🚀 Sending to API:", currentInput);
+            
             const res = await fetch("/api/chat", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
+                headers: { 
+                    "Content-Type": "application/json" 
                 },
-                body: JSON.stringify({
-                    message: userMsg.text,
-                    conversationHistory: updatedHistory.slice(-10)
+                body: JSON.stringify({ 
+                    message: currentInput
                 })
             });
 
@@ -132,6 +125,11 @@ export default function ChatBot() {
             const data = await res.json();
             console.log("✅ API Response:", data);
 
+            // Check if this is a fallback response (API issues)
+            if (data.fallback || data.error) {
+                console.warn("⚠️ Received fallback/error response:", data);
+            }
+
             const botMsg = {
                 text: data.reply || "Hmm, seems like I'm having a quiet moment here in my virtual space. Could you try asking me something about Altyeb? I'd love to chat!",
                 sender: "bot",
@@ -139,13 +137,10 @@ export default function ChatBot() {
                 id: Date.now() + 1,
                 isTyping: true
             };
-
+            
             setMessages((prev) => [...prev, botMsg]);
             setTypingMessageId(botMsg.id);
-
-            // Add bot response to conversation history
-            setConversationHistory(prev => [...prev, { role: "assistant", content: botMsg.text }]);
-
+            
         } catch (error) {
             console.error("💥 Error:", error);
             const errorMsg = {
@@ -166,16 +161,22 @@ export default function ChatBot() {
         scrollToBottom();
     }, [messages, isThinking]);
 
+    // FIXED: Only trigger sendMessage on Enter key, not on every keystroke
     const handleKeyPress = (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey && !isThinking) {
             e.preventDefault();
             sendMessage();
         }
     };
 
+    // FIXED: Separate function for input changes to prevent triggering send
+    const handleInputChange = (e) => {
+        setInput(e.target.value);
+    };
+
     const suggestedQuestions = [
         "Should I hire Altyeb?",
-        "What are his strengths?",
+        "What are his strengths?", 
         "Tell me about his projects",
         "What's his experience with AI?",
         "How did he create this portfolio?",
@@ -193,7 +194,7 @@ export default function ChatBot() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5"></div>
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-purple-500/10 to-transparent rounded-full blur-3xl"></div>
-
+            
             {/* Enhanced Header */}
             <div className="relative z-10 px-4 py-3 border-b border-slate-700/50 bg-slate-800/80 backdrop-blur-sm">
                 <div className="flex items-center space-x-3">
@@ -222,12 +223,12 @@ export default function ChatBot() {
                             Hey there! Welcome to my digital home 👋
                         </h2>
                         <p className="text-slate-400 text-sm max-w-md leading-relaxed">
-                            I'm the AI assistant trapped inside this virtual laptop (yes, really!). I'm here to tell you all about
-                            <span className="text-blue-400 font-medium"> Altyeb's skills, projects, and experience</span>.
+                            I'm the AI assistant trapped inside this virtual laptop (yes, really!). I'm here to tell you all about 
+                            <span className="text-blue-400 font-medium"> Altyeb's skills, projects, and experience</span>. 
                             Ask me anything - I promise to be both helpful and entertaining! 🎭
                         </p>
                     </div>
-
+                    
                     {/* Enhanced suggested questions */}
                     <div className="w-full max-w-md mb-6">
                         <p className="text-xs text-slate-500 mb-3 text-center flex items-center justify-center space-x-1">
@@ -254,16 +255,17 @@ export default function ChatBot() {
                                 className="w-full bg-slate-800/80 backdrop-blur-sm rounded-2xl px-4 py-3 pr-12 outline-none text-sm border border-slate-700/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 placeholder-slate-500"
                                 placeholder="Ask me about Altyeb... 🤔"
                                 value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={handleKeyPress}
+                                onChange={handleInputChange}
+                                onKeyPress={handleKeyPress}
                             />
                             <button
                                 onClick={sendMessage}
                                 disabled={!input.trim() || isThinking}
-                                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking
+                                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${
+                                    input.trim() && !isThinking
                                         ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:scale-105"
                                         : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-                                    }`}
+                                }`}
                             >
                                 <Send size={16} />
                             </button>
@@ -286,31 +288,34 @@ export default function ChatBot() {
                             ) : (
                                 <div
                                     key={msg.id}
-                                    className={`flex items-start space-x-3 animate-slide-up ${msg.sender === "user" ? "flex-row-reverse space-x-reverse" : ""
-                                        }`}
+                                    className={`flex items-start space-x-3 animate-slide-up ${
+                                        msg.sender === "user" ? "flex-row-reverse space-x-reverse" : ""
+                                    }`}
                                 >
                                     {/* Avatar */}
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ${msg.sender === "user"
-                                            ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-green-500/25"
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ${
+                                        msg.sender === "user" 
+                                            ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-green-500/25" 
                                             : "bg-gradient-to-r from-blue-500 to-purple-600 shadow-blue-500/25"
-                                        }`}>
+                                    }`}>
                                         {msg.sender === "user" ? <User size={16} /> : <Bot size={16} />}
                                     </div>
 
                                     {/* Message bubble */}
                                     <div className={`max-w-[75%] ${msg.sender === "user" ? "items-end" : "items-start"} flex flex-col`}>
                                         <div
-                                            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-lg ${msg.sender === "user"
+                                            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-lg ${
+                                                msg.sender === "user"
                                                     ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-blue-500/25"
                                                     : "bg-slate-800/80 backdrop-blur-sm text-slate-100 rounded-bl-md border border-slate-700/30"
-                                                }`}
+                                            }`}
                                         >
                                             {msg.text}
                                         </div>
                                         <span className="text-xs text-slate-500 mt-1 px-1">
-                                            {new Date(msg.timestamp).toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
+                                            {new Date(msg.timestamp).toLocaleTimeString([], { 
+                                                hour: '2-digit', 
+                                                minute: '2-digit' 
                                             })}
                                         </span>
                                     </div>
@@ -337,7 +342,7 @@ export default function ChatBot() {
                                 </div>
                             </div>
                         )}
-
+                        
                         <div ref={messagesEndRef} />
                     </div>
 
@@ -349,17 +354,18 @@ export default function ChatBot() {
                                     className="w-full bg-slate-800/80 backdrop-blur-sm rounded-2xl px-4 py-3 pr-12 outline-none text-sm border border-slate-700/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none placeholder-slate-500"
                                     placeholder="Continue the conversation... 💭"
                                     value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={handleKeyPress}
+                                    onChange={handleInputChange}
+                                    onKeyPress={handleKeyPress}
                                     disabled={isThinking}
                                 />
                                 <button
                                     onClick={sendMessage}
                                     disabled={!input.trim() || isThinking}
-                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking
+                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${
+                                        input.trim() && !isThinking
                                             ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:scale-105"
                                             : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-                                        }`}
+                                    }`}
                                 >
                                     <Send size={16} />
                                 </button>

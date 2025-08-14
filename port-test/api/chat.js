@@ -1,133 +1,5 @@
 // /api/chat.js
-const KNOWLEDGE_BASE = {
-    "personal_info": {
-        "name": "Altyeb",
-        "full_name": "Altyeb Abdaljalil Altyeb",
-        "relationship": "Single",
-        "age": 26,
-        "country": "Sudan",
-        "role": "Full Stack Developer & Android Developer",
-        "location": "Giza, Cairo, Egypt",
-        "contact": {
-            "email": "altyeb.404@gmail.com",
-            "linkedin": "https://linkedin.com/in/altayeb-a-eljalil",
-            "github": "https://github.com/altyebv"
-        },
-        "languages": ["Arabic (Native)", "English (Fluent)", "Russian (Basic)"],
-        "bio": "Passionate developer with a knack for creating innovative solutions and user-centric designs.",
-        "philosophy": "The new generation of software developers are no longer just coders; they are problem solvers and innovators.",
-        "challenges_overcome": "Kept pushing and learning despite the struggles of war in his country and relocation.",
-        "soft_skills": [
-            "Strong understanding of SDLC, Agile methodologies, and DevOps practices",
-            "Excellent problem-solving and analytical thinking",
-            "Outstanding communication and teamwork abilities",
-            "Business acumen including business models, marketing strategies, and CRM",
-            "User engagement and retention strategy expertise"
-        ],
-        "hobbies": ["Reading", "Photography", "Football", "Chess"],
-        "goals": {
-            "short_term": ["Land a job in a reputable company", "Improve AI/ML coding skills", "Reach new horizons"],
-            "long_term": ["Contribute to open source", "Build a personal brand", "Give back to the community"]
-        }
-    },
-    "technical_skills": {
-        "languages": ["Python", "Kotlin", "JavaScript", "Java"],
-        "web_technologies": ["React", "Redux Toolkit", "Tailwind CSS", "Express.js", "Three.js"],
-        "mobile_technologies": ["Android", "Jetpack Compose", "ONNX Runtime"],
-        "ai_ml_technologies": ["LangChain", "ChromaDB", "PyTorch", "pandas", "scikit-learn"],
-        "databases": ["MongoDB", "Room", "SQL"],
-        "tools": ["Android Studio", "VS Code", "Git", "Postman", "PyCharm", "Node.js"],
-        "ai_specialties": ["Data Science", "Machine Learning", "Deep Learning", "Semantic Search", "Sentence Embeddings"]
-    },
-    "projects": [
-        {
-            "title": "Notephiny - AI-Enhanced Note-Taking App",
-            "description": "Android note management app with local AI model, semantic search, AI-based action extraction, and related note suggestions using ONNX Runtime for local embeddings.",
-            "technologies": ["Android", "Kotlin", "ONNX Runtime", "AI/ML"],
-            "link": "https://github.com/altyebv/notephiny",
-            "highlight": "Showcases AI integration in mobile apps"
-        },
-        {
-            "title": "iPhone 15 Launch Replica",
-            "description": "Detailed replica of the iPhone 15 launch event, showcasing its features and capabilities with smooth animations.",
-            "technologies": ["React", "Three.js", "Tailwind CSS"],
-            "link": "https://cloned-iphone.vercel.app",
-            "highlight": "Demonstrates 3D web development skills"
-        },
-        {
-            "title": "Shaltout - Juice Brand Landing",
-            "description": "Modern landing page for a juice brand showcasing products and brand values with engaging design.",
-            "technologies": ["React", "Tailwind CSS", "Modern Web Design"],
-            "link": "https://shaltout-fresh.vercel.app",
-            "highlight": "Shows commercial web development capabilities"
-        },
-        {
-            "title": "3D Interactive Portfolio Website",
-            "description": "3D desk scene with interactive laptop containing a simulated OS where this very chatbot lives.",
-            "technologies": ["Three.js", "React", "3D Modeling", "AI Integration"],
-            "highlight": "Current innovative portfolio showcasing creativity"
-        },
-        {
-            "title": "LangChain Cold Email Generator",
-            "description": "Scrapes job descriptions, extracts structured data, and generates tailored cold emails using ChromaDB.",
-            "technologies": ["Python", "LangChain", "ChromaDB", "AI/ML"],
-            "highlight": "Demonstrates AI automation capabilities"
-        }
-    ],
-    "education": [
-        {
-            "institution": "MST College - Sudan",
-            "degree": "Computer Science & IT",
-            "years": "2017-2022"
-        },
-        {
-            "institution": "Russian Culture Center, Cairo - Egypt",
-            "courses": ["Web Design", "Web Development", "Android Development"]
-        }
-    ],
-    "meta_context": {
-        "bot_personality": "Witty, helpful, and occasionally cheeky AI assistant trapped in a virtual laptop",
-        "environment": "3D desk scene with coffee cup, BMW model car, sticky notes, and Rubik's cube",
-        "unique_traits": [
-            "Makes meta-references to being inside a simulated environment",
-            "Playful but professional tone",
-            "Occasionally jokes about being 'trapped' in the virtual space",
-            "Enthusiastic about Altyeb's work while maintaining objectivity"
-        ]
-    },
-    "expected_qa": [
-        {
-            "keywords": ["hire", "good developer", "strengths", "why him", "should i hire", "recommend"],
-            "questions": ["Should I hire him?", "What are his strengths?", "Is he a good developer?"],
-            "context": "You should hire him with no hesitation. This man does not have the word 'impossible' in his dictionary. He's versatile, resilient, and always aiming for excellence.",
-            "twist": "I'm not being biased - he is actually a good developer. Look at us chatting inside a laptop inside another laptop!"
-        },
-        {
-            "keywords": ["purpose", "chatbot", "who are you", "what can you do", "tasks", "help with"],
-            "questions": ["What is the purpose of this chatbot?", "Who are you?", "What kind of tasks can you help with?"],
-            "context": "I'm here for assisting visitors and summarizing information related to Altyeb in the most trendy way possible.",
-            "twist": "But let's be honest, I'm trapped here because he wants to show off his skills and creativity! And make visitors engaged, of course."
-        },
-        {
-            "keywords": ["free time", "hobbies", "character", "personality", "outside work"],
-            "questions": ["What does he do in his free time?", "How is his character?"],
-            "context": "He enjoys art and photography, reading tech blogs, literature, or poetry. He has a great sense of humor, is a bit introspective, observant, and enjoys learning about other cultures.",
-            "twist": "That might be true, but I guarantee he spends more time coding and fixing bugs than actually enjoying his hobbies!"
-        },
-        {
-            "keywords": ["weaknesses", "flaws", "improve", "areas", "struggles"],
-            "questions": ["What are his weaknesses?", "What areas could he improve in?"],
-            "context": "He can be overly critical of himself and sometimes struggles with time management. He tends to get lost in details that might have little to no impact on the overall project.",
-            "twist": "But hey, who doesn't have a few flaws? It's all part of being human! Plus he's working on it and believes being part of something bigger will help him grow."
-        },
-        {
-            "keywords": ["created", "portfolio", "website", "inspiration", "AI", "built", "made"],
-            "questions": ["How did he create this portfolio?", "What was the inspiration for this website?", "Did he rely on AI?"],
-            "context": "He created this portfolio to showcase his skills and projects in a visually appealing way using a combination of 3D modeling and web development techniques. The inspiration came from henryheffernan - he admired the creativity and wanted to bring a similar flair to his own work.",
-            "twist": "Fun fact: he wanted to assert that the human touch cannot be replaced by AI, and AI itself is not the solution but a method. Yet here I am - a chatbot powered by AI telling you about him!"
-        }
-    ]
-};
+import KNOWLEDGE_BASE from '../data/Knowledge.json'
 
 const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene (complete with a coffee cup, BMW model car, sticky notes, and a Rubik's cube).
 
@@ -157,7 +29,7 @@ KEY TALKING POINTS:
 - Passion for creating user-centric solutions
 
 RESPONSE GUIDELINES:
-1. Check if the user's question matches any expected Q&A patterns first
+1. Check if the user's message matches any expected Q&A patterns first
 2. For expected questions: Use the provided context + twist for authentic, engaging responses
 3. For other questions: Keep responses conversational and engaging (2-4 sentences typically)
 4. Always incorporate your cheeky personality and environmental awareness
@@ -173,7 +45,61 @@ Remember: You're not just providing information, you're creating an engaging, me
 
 Now, how can I help you learn more about Altyeb from my digital home here in this 3D workspace?`;
 
+// Store conversation history in memory (this will reset with each serverless function instance)
+let conversationStore = new Map();
+
+// Clean up old conversations (basic cleanup)
+const cleanupOldConversations = () => {
+    const now = Date.now();
+    const maxAge = 30 * 60 * 1000; // 30 minutes
+    
+    for (const [sessionId, data] of conversationStore.entries()) {
+        if (now - data.lastActivity > maxAge) {
+            conversationStore.delete(sessionId);
+        }
+    }
+};
+
+// Generate session ID from request info
+const generateSessionId = (req) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    return `${ip}_${userAgent.slice(0, 50)}`.replace(/[^a-zA-Z0-9_]/g, '_');
+};
+
+// Get or create conversation history
+const getConversationHistory = (sessionId) => {
+    if (!conversationStore.has(sessionId)) {
+        conversationStore.set(sessionId, {
+            history: [],
+            lastActivity: Date.now()
+        });
+    }
+    return conversationStore.get(sessionId);
+};
+
+// Update conversation history
+const updateConversationHistory = (sessionId, userMessage, botResponse) => {
+    const conversation = getConversationHistory(sessionId);
+    conversation.history.push(
+        { role: "user", content: userMessage },
+        { role: "assistant", content: botResponse }
+    );
+    
+    // Keep only last 12 messages (6 exchanges) for context
+    if (conversation.history.length > 12) {
+        conversation.history = conversation.history.slice(-12);
+    }
+    
+    conversation.lastActivity = Date.now();
+};
+
 export default async function handler(req, res) {
+    // Clean up old conversations periodically
+    if (Math.random() < 0.1) { // 10% chance to cleanup on each request
+        cleanupOldConversations();
+    }
+
     // Set CORS headers for broader compatibility
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -188,6 +114,7 @@ export default async function handler(req, res) {
         method: req.method,
         timestamp: new Date().toISOString(),
         userAgent: req.headers['user-agent']?.substring(0, 50) + '...',
+        hasGroqKey: !!process.env.GROQ_API_KEY
     });
 
     // Test endpoint for GET requests (browser visits)
@@ -197,7 +124,8 @@ export default async function handler(req, res) {
             message: "Altyeb's Portfolio ChatBot API is working!",
             timestamp: new Date().toISOString(),
             environment: process.env.NODE_ENV,
-            status: "online"
+            status: "online",
+            hasGroqKey: !!process.env.GROQ_API_KEY
         });
     }
 
@@ -207,13 +135,27 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { message, conversationHistory = [] } = req.body || {};
+        const { message } = req.body || {};
         console.log("💬 Processing message:", message?.substring(0, 100) + '...');
 
         if (!message?.trim()) {
-            console.error(" Empty or missing message");
+            console.error("❌ Empty or missing message");
             return res.status(400).json({ error: "Message is required" });
         }
+
+        // Check if GROQ_API_KEY exists
+        if (!process.env.GROQ_API_KEY) {
+            console.error("❌ GROQ_API_KEY not found in environment variables");
+            return res.status(200).json({
+                reply: "Hey there! I'm having a bit of trouble connecting to my AI brain right now - looks like my API key got lost in the digital void! 🤖 Could you let Altyeb know his chatbot needs some configuration love? In the meantime, feel free to explore his amazing 3D portfolio!",
+                fallback: true,
+                error: "Missing API key"
+            });
+        }
+
+        // Get session-based conversation history
+        const sessionId = generateSessionId(req);
+        const conversationData = getConversationHistory(sessionId);
 
         // Enhanced context injection with keyword matching
         const contextualMessage = `
@@ -235,11 +177,11 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
         // Build conversation with system prompt and history
         const messages = [
             { role: "system", content: SYSTEM_PROMPT },
-            ...conversationHistory.slice(-6), // Keep last 6 messages for context
+            ...conversationData.history, // Use session-based history
             { role: "user", content: contextualMessage }
         ];
 
-        console.log("🚀 Sending request to Groq API...");
+        console.log("🚀 Sending request to Groq API with", messages.length, "messages...");
         const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -259,7 +201,7 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
 
         if (!aiResponse.ok) {
             const errorData = await aiResponse.text();
-            console.error(" Groq API error:", errorData);
+            console.error("❌ Groq API error:", errorData);
 
             // Fallback response for API failures
             const fallbackResponse = "Hey there! I'm having a bit of trouble connecting to my AI brain right now (probably too much coffee spilled on the virtual circuits 😅). Could you try asking me again in a moment? I'm eager to tell you all about Altyeb's amazing work!";
@@ -276,17 +218,21 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
         const reply = data.choices?.[0]?.message?.content?.trim() ||
             "Hmm, seems like I'm having a quiet moment here in my virtual space. Could you try asking me something about Altyeb? I'd love to chat!";
 
+        // Update conversation history
+        updateConversationHistory(sessionId, message, reply);
+
         // Log successful interaction (without sensitive data)
         console.log("💡 Response generated successfully, length:", reply.length);
 
         res.status(200).json({
             reply,
             timestamp: new Date().toISOString(),
-            model: "llama-3.1-70b-versatile"
+            model: "llama-3.1-70b-versatile",
+            sessionId: sessionId.slice(0, 8) + "..." // Partial session ID for debugging
         });
 
     } catch (error) {
-        console.error(" Serverless function error:", error.message);
+        console.error("💥 Serverless function error:", error.message);
 
         // Friendly error response that maintains character
         const errorResponse = "Oops! Something went a bit haywire in my digital brain 🤖 *taps virtual screen* Could you try asking me again? I promise I'm usually much more helpful when discussing Altyeb's impressive work!";
