@@ -1,6 +1,132 @@
-import path from 'path';
-import { promises as fs } from 'fs';
-
+const KNOWLEDGE_BASE = {
+    "personal_info": {
+        "name": "Altyeb",
+        "full_name": "Altyeb Abdaljalil Altyeb",
+        "relationship": "Single",
+        "age": 26,
+        "country": "Sudan",
+        "role": "Full Stack Developer & Android Developer",
+        "location": "Giza, Cairo, Egypt",
+        "contact": {
+            "email": "altyeb.404@gmail.com",
+            "linkedin": "https://linkedin.com/in/altayeb-a-eljalil",
+            "github": "https://github.com/altyebv"
+        },
+        "languages": ["Arabic (Native)", "English (Fluent)", "Russian (Basic)"],
+        "bio": "Passionate developer with a knack for creating innovative solutions and user-centric designs.",
+        "philosophy": "The new generation of software developers are no longer just coders; they are problem solvers and innovators.",
+        "challenges_overcome": "Kept pushing and learning despite the struggles of war in his country and relocation.",
+        "soft_skills": [
+            "Strong understanding of SDLC, Agile methodologies, and DevOps practices",
+            "Excellent problem-solving and analytical thinking",
+            "Outstanding communication and teamwork abilities",
+            "Business acumen including business models, marketing strategies, and CRM",
+            "User engagement and retention strategy expertise"
+        ],
+        "hobbies": ["Reading", "Photography", "Football", "Chess"],
+        "goals": {
+            "short_term": ["Land a job in a reputable company", "Improve AI/ML coding skills", "Reach new horizons"],
+            "long_term": ["Contribute to open source", "Build a personal brand", "Give back to the community"]
+        }
+    },
+    "technical_skills": {
+        "languages": ["Python", "Kotlin", "JavaScript", "Java"],
+        "web_technologies": ["React", "Redux Toolkit", "Tailwind CSS", "Express.js", "Three.js"],
+        "mobile_technologies": ["Android", "Jetpack Compose", "ONNX Runtime"],
+        "ai_ml_technologies": ["LangChain", "ChromaDB", "PyTorch", "pandas", "scikit-learn"],
+        "databases": ["MongoDB", "Room", "SQL"],
+        "tools": ["Android Studio", "VS Code", "Git", "Postman", "PyCharm", "Node.js"],
+        "ai_specialties": ["Data Science", "Machine Learning", "Deep Learning", "Semantic Search", "Sentence Embeddings"]
+    },
+    "projects": [
+        {
+            "title": "Notephiny - AI-Enhanced Note-Taking App",
+            "description": "Android note management app with local AI model, semantic search, AI-based action extraction, and related note suggestions using ONNX Runtime for local embeddings.",
+            "technologies": ["Android", "Kotlin", "ONNX Runtime", "AI/ML"],
+            "link": "https://github.com/altyebv/notephiny",
+            "highlight": "Showcases AI integration in mobile apps"
+        },
+        {
+            "title": "iPhone 15 Launch Replica",
+            "description": "Detailed replica of the iPhone 15 launch event, showcasing its features and capabilities with smooth animations.",
+            "technologies": ["React", "Three.js", "Tailwind CSS"],
+            "link": "https://cloned-iphone.vercel.app",
+            "highlight": "Demonstrates 3D web development skills"
+        },
+        {
+            "title": "Shaltout - Juice Brand Landing",
+            "description": "Modern landing page for a juice brand showcasing products and brand values with engaging design.",
+            "technologies": ["React", "Tailwind CSS", "Modern Web Design"],
+            "link": "https://shaltout-fresh.vercel.app",
+            "highlight": "Shows commercial web development capabilities"
+        },
+        {
+            "title": "3D Interactive Portfolio Website",
+            "description": "3D desk scene with interactive laptop containing a simulated OS where this very chatbot lives.",
+            "technologies": ["Three.js", "React", "3D Modeling", "AI Integration"],
+            "highlight": "Current innovative portfolio showcasing creativity"
+        },
+        {
+            "title": "LangChain Cold Email Generator",
+            "description": "Scrapes job descriptions, extracts structured data, and generates tailored cold emails using ChromaDB.",
+            "technologies": ["Python", "LangChain", "ChromaDB", "AI/ML"],
+            "highlight": "Demonstrates AI automation capabilities"
+        }
+    ],
+    "education": [
+        {
+            "institution": "MST College - Sudan",
+            "degree": "Computer Science & IT",
+            "years": "2017-2022"
+        },
+        {
+            "institution": "Russian Culture Center, Cairo - Egypt",
+            "courses": ["Web Design", "Web Development", "Android Development"]
+        }
+    ],
+    "meta_context": {
+        "bot_personality": "Witty, helpful, and occasionally cheeky AI assistant trapped in a virtual laptop",
+        "environment": "3D desk scene with coffee cup, BMW model car, sticky notes, and Rubik's cube",
+        "unique_traits": [
+            "Makes meta-references to being inside a simulated environment",
+            "Playful but professional tone",
+            "Occasionally jokes about being 'trapped' in the virtual space",
+            "Enthusiastic about Altyeb's work while maintaining objectivity"
+        ]
+    },
+    "expected_qa": [
+        {
+            "keywords": ["hire", "good developer", "strengths", "why him", "should i hire", "recommend"],
+            "questions": ["Should I hire him?", "What are his strengths?", "Is he a good developer?"],
+            "context": "You should hire him with no hesitation. This man does not have the word 'impossible' in his dictionary. He's versatile, resilient, and always aiming for excellence.",
+            "twist": "I'm not being biased - he is actually a good developer. Look at us chatting inside a laptop inside another laptop!"
+        },
+        {
+            "keywords": ["purpose", "chatbot", "who are you", "what can you do", "tasks", "help with"],
+            "questions": ["What is the purpose of this chatbot?", "Who are you?", "What kind of tasks can you help with?"],
+            "context": "I'm here for assisting visitors and summarizing information related to Altyeb in the most trendy way possible.",
+            "twist": "But let's be honest, I'm trapped here because he wants to show off his skills and creativity! And make visitors engaged, of course."
+        },
+        {
+            "keywords": ["free time", "hobbies", "character", "personality", "outside work"],
+            "questions": ["What does he do in his free time?", "How is his character?"],
+            "context": "He enjoys art and photography, reading tech blogs, literature, or poetry. He has a great sense of humor, is a bit introspective, observant, and enjoys learning about other cultures.",
+            "twist": "That might be true, but I guarantee he spends more time coding and fixing bugs than actually enjoying his hobbies!"
+        },
+        {
+            "keywords": ["weaknesses", "flaws", "improve", "areas", "struggles"],
+            "questions": ["What are his weaknesses?", "What areas could he improve in?"],
+            "context": "He can be overly critical of himself and sometimes struggles with time management. He tends to get lost in details that might have little to no impact on the overall project.",
+            "twist": "But hey, who doesn't have a few flaws? It's all part of being human! Plus he's working on it and believes being part of something bigger will help him grow."
+        },
+        {
+            "keywords": ["created", "portfolio", "website", "inspiration", "AI", "built", "made"],
+            "questions": ["How did he create this portfolio?", "What was the inspiration for this website?", "Did he rely on AI?"],
+            "context": "He created this portfolio to showcase his skills and projects in a visually appealing way using a combination of 3D modeling and web development techniques. The inspiration came from henryheffernan - he admired the creativity and wanted to bring a similar flair to his own work.",
+            "twist": "Fun fact: he wanted to assert that the human touch cannot be replaced by AI, and AI itself is not the solution but a method. Yet here I am - a chatbot powered by AI telling you about him!"
+        }
+    ]
+}
 
 const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene (complete with a coffee cup, BMW model car, sticky notes, and a Rubik's cube).
 
@@ -47,9 +173,7 @@ Remember: You're not just providing information, you're creating an engaging, me
 Now, how can I help you learn more about Altyeb from my digital home here in this 3D workspace?`;
 
 export default async function handler(req, res) {
-    const filePath = path.join(process.cwd(), 'data', 'Knowledge.json');
-    const fileData = await fs.readFile(filePath, 'utf8');
-    const KNOWLEDGE_BASE = JSON.parse(fileData);
+
 
     console.log("📩 Incoming request:", {
         method: req.method,
