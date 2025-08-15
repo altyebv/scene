@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Bot, User } from "lucide-react";
-
-
+import { Send, Bot, User, Trash2, RotateCcw } from "lucide-react";
 
 export default function ChatBot() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isThinking, setIsThinking] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
     const [started, setStarted] = useState(false);
+    const [conversationId] = useState(() => `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
 
@@ -20,8 +20,35 @@ export default function ChatBot() {
         }
     };
 
+    // Typing animation function
+    const typeMessage = (text, callback) => {
+        setIsTyping(true);
+        const words = text.split(' ');
+        let currentText = '';
+        let wordIndex = 0;
+
+        const typeInterval = setInterval(() => {
+            if (wordIndex < words.length) {
+                currentText += (wordIndex > 0 ? ' ' : '') + words[wordIndex];
+                callback(currentText);
+                wordIndex++;
+            } else {
+                clearInterval(typeInterval);
+                setIsTyping(false);
+            }
+        }, 100); // Adjust speed as needed
+
+        return typeInterval;
+    };
+
+    const clearMessages = () => {
+        setMessages([]);
+        setStarted(false);
+        setInput("");
+    };
+
     const sendMessage = async () => {
-        if (!input.trim() || isThinking) return;
+        if (!input.trim() || isThinking || isTyping) return;
 
         if (!started) setStarted(true);
 
@@ -40,18 +67,40 @@ export default function ChatBot() {
             const res = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMsg.text })
+                body: JSON.stringify({ 
+                    message: userMsg.text,
+                    conversationId,
+                    conversationHistory: [...messages, userMsg]
+                })
             });
 
             const data = await res.json();
+            const botResponseText = data.reply || "(No response from AI)";
 
-            const botMsg = {
-                text: data.reply || "(No response from AI)",
+            // Create initial bot message with empty text
+            const botMsgId = Date.now() + 1;
+            const initialBotMsg = {
+                text: "",
                 sender: "bot",
                 timestamp: Date.now(),
-                id: Date.now() + 1
+                id: botMsgId,
+                isTyping: true
             };
-            setMessages((prev) => [...prev, botMsg]);
+
+            setMessages((prev) => [...prev, initialBotMsg]);
+            setIsThinking(false);
+
+            // Start typing animation
+            typeMessage(botResponseText, (currentText) => {
+                setMessages((prev) => 
+                    prev.map(msg => 
+                        msg.id === botMsgId 
+                            ? { ...msg, text: currentText, isTyping: currentText !== botResponseText }
+                            : msg
+                    )
+                );
+            });
+
         } catch (error) {
             console.error("Error talking to API:", error);
             setMessages((prev) => [...prev, {
@@ -60,11 +109,9 @@ export default function ChatBot() {
                 timestamp: Date.now(),
                 id: Date.now() + 1
             }]);
-        } finally {
             setIsThinking(false);
         }
     };
-
 
     useEffect(() => {
         scrollToBottom();
@@ -85,17 +132,31 @@ export default function ChatBot() {
 
             {/* Header */}
             <div className="relative z-10 px-4 py-3 border-b border-slate-700/50 bg-slate-800/80 backdrop-blur-sm">
-                <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <Bot size={16} className="text-white" />
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                            <Bot size={16} className="text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-medium text-sm">Portfolio Assistant</h3>
+                            <p className="text-xs text-slate-400">Ask me about Altyeb's work and experience</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-medium text-sm">Portfolio Assistant</h3>
-                        <p className="text-xs text-slate-400">Ask me about Zee's work and experience</p>
-                    </div>
-                    <div className="ml-auto flex items-center space-x-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-slate-400">Online</span>
+                    
+                    <div className="flex items-center space-x-2">
+                        {started && (
+                            <button
+                                onClick={clearMessages}
+                                className="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white transition-all duration-200"
+                                title="Clear conversation"
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        )}
+                        <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span className="text-xs text-slate-400">Online</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -145,11 +206,12 @@ export default function ChatBot() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyPress}
+                                disabled={isThinking || isTyping}
                             />
                             <button
                                 onClick={sendMessage}
-                                disabled={!input.trim() || isThinking}
-                                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking
+                                disabled={!input.trim() || isThinking || isTyping}
+                                className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking && !isTyping
                                     ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25"
                                     : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
                                     }`}
@@ -192,6 +254,9 @@ export default function ChatBot() {
                                             }`}
                                     >
                                         {msg.text}
+                                        {msg.isTyping && (
+                                            <span className="inline-block w-2 h-4 bg-slate-400 animate-pulse ml-1 rounded-sm"></span>
+                                        )}
                                     </div>
                                     <span className="text-xs text-slate-500 mt-1 px-1">
                                         {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -227,25 +292,49 @@ export default function ChatBot() {
                         <div className="flex items-end space-x-3">
                             <div className="flex-1 relative">
                                 <input
-                                    className="w-full bg-slate-800/80 backdrop-blur-sm rounded-2xl px-4 py-3 pr-12 outline-none text-sm border border-slate-700/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none"
-                                    placeholder="Type your message..."
+                                    className={`w-full bg-slate-800/80 backdrop-blur-sm rounded-2xl px-4 py-3 pr-12 outline-none text-sm border border-slate-700/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none ${
+                                        (isThinking || isTyping) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                    placeholder={
+                                        isThinking ? "Thinking..." : 
+                                        isTyping ? "Bot is typing..." : 
+                                        "Type your message..."
+                                    }
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={handleKeyPress}
-                                    disabled={isThinking}
+                                    disabled={isThinking || isTyping}
                                 />
                                 <button
                                     onClick={sendMessage}
-                                    disabled={!input.trim() || isThinking}
-                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking
+                                    disabled={!input.trim() || isThinking || isTyping}
+                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all duration-200 ${input.trim() && !isThinking && !isTyping
                                         ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:scale-105"
                                         : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
-                                    <Send size={16} />
+                                    {isThinking || isTyping ? (
+                                        <div className="w-4 h-4">
+                                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : (
+                                        <Send size={16} />
+                                    )}
                                 </button>
                             </div>
                         </div>
+                        
+                        {/* Status indicator */}
+                        {(isThinking || isTyping) && (
+                            <div className="flex items-center justify-center mt-2">
+                                <div className="flex items-center space-x-2 text-xs text-slate-400">
+                                    <div className="w-1 h-1 bg-slate-400 rounded-full animate-pulse"></div>
+                                    <span>
+                                        {isThinking ? "AI is thinking..." : "AI is typing..."}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </>
             )}

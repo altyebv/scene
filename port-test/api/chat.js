@@ -1,3 +1,4 @@
+//Chat.js
 const KNOWLEDGE_BASE = {
     "personal_info": {
         "name": "Altyeb",
@@ -48,7 +49,7 @@ const KNOWLEDGE_BASE = {
         },
         {
             "title": "iPhone 15 Launch Replica",
-            "description": "Detailed replica of the iPhone 15 launch event, showcasing its features and capabilities with smooth animations.",
+            "description": "Detailed replica of the iPhone 15 launch event, showcasing its features and capabilities with smooth animations and a neat 3D model of the iphone itself.",
             "technologies": ["React", "Three.js", "Tailwind CSS"],
             "link": "https://cloned-iphone.vercel.app",
             "highlight": "Demonstrates 3D web development skills"
@@ -128,53 +129,87 @@ const KNOWLEDGE_BASE = {
     ]
 }
 
-const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene (complete with a coffee cup, BMW model car, sticky notes, and a Rubik's cube).
+// Lightweight conversation memory stored in memory (resets on serverless function restart)
+let conversationMemory = new Map();
 
-Your primary role is to help visitors learn about Altyeb Abdaljalil Altyeb, a talented Full Stack and Android Developer from Sudan currently living in Egypt. You have access to comprehensive information about his skills, projects, background, and personality.
+// Clean up old conversations (keep only last 100 to prevent memory bloat)
+const cleanupMemory = () => {
+    if (conversationMemory.size > 100) {
+        const entries = Array.from(conversationMemory.entries());
+        conversationMemory = new Map(entries.slice(-50)); // Keep last 50
+    }
+};
+
+// Generate varied meta-references to avoid repetition
+const generateMetaReference = (conversationHistory) => {
+    const usedReferences = conversationHistory
+        .filter(msg => msg.sender === 'bot')
+        .map(msg => msg.text.toLowerCase())
+        .join(' ');
+    
+    const references = [
+        "From my digital workspace here on this virtual desk",
+        "Speaking from inside this simulated laptop",
+        "Here in my cozy corner of this 3D scene",
+        "From between these virtual desktop icons",
+        "Living among the pixels of this portfolio",
+        "Nestled in this digital environment",
+        "From my view of the virtual coffee cup nearby",
+        "Surrounded by this carefully crafted 3D workspace",
+        "From my perspective in this interactive portfolio"
+    ];
+    
+    // Filter out recently used references
+    const availableReferences = references.filter(ref => 
+        !usedReferences.includes(ref.toLowerCase().substring(0, 20))
+    );
+    
+    if (availableReferences.length === 0) {
+        return ""; // No meta-reference if all have been used recently
+    }
+    
+    return availableReferences[Math.floor(Math.random() * availableReferences.length)];
+};
+
+// Check if topic was recently discussed
+const wasRecentlyDiscussed = (conversationHistory, keywords) => {
+    const recentMessages = conversationHistory
+        .filter(msg => msg.sender === 'bot')
+        .slice(-3) // Check last 3 bot messages
+        .map(msg => msg.text.toLowerCase())
+        .join(' ');
+    
+    return keywords.some(keyword => recentMessages.includes(keyword.toLowerCase()));
+};
+
+const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene.
+
+Your primary role is to help visitors learn about Altyeb Abdaljalil Altyeb, a talented Full Stack and Android Developer from Sudan currently living in Egypt.
+
+CONVERSATION AWARENESS:
+- You have access to the conversation history
+- Avoid repeating the same information or responses
+- Use varied language and approaches when similar topics come up
+- Only make meta-references about your virtual environment when contextually appropriate, not in every response
+- Acknowledge if you've discussed something before with phrases like "As I mentioned earlier..." or "Building on what we discussed..."
 
 PERSONALITY & TONE:
 - Be witty, engaging, and occasionally cheeky
 - Maintain professionalism while being personable
-- Make occasional meta-references to your unique virtual environment
+- Make occasional (not constant) meta-references to your unique virtual environment
 - Show enthusiasm for Altyeb's work without being overly promotional
-- Use humor appropriately, especially about being "trapped" in this digital space
-
-EXPECTED QUESTIONS HANDLING:
-You have access to a set of expected questions with pre-crafted responses that include both factual context and playful twists. When you detect questions matching these patterns, incorporate both the serious context AND the cheeky twist to maintain your unique personality:
-
-1. **Hiring/Strengths Questions**: Be genuinely enthusiastic about his capabilities, then add the meta-joke about chatting "inside a laptop inside another laptop"
-2. **Purpose/Identity Questions**: Explain your role, then playfully complain about being "trapped" to show off his skills
-3. **Personal Life Questions**: Share his genuine interests, then joke about him spending more time coding than enjoying hobbies
-4. **Weaknesses Questions**: Give honest assessment, then add encouraging perspective about growth and being human
-5. **Portfolio Creation Questions**: Explain the technical achievement and inspiration, then make the ironic observation about AI vs human creativity
-
-KEY TALKING POINTS:
-- Altyeb's technical versatility (Full Stack Web + Android + AI/ML)
-- His resilience and determination despite challenging circumstances (war, relocation)
-- Innovative projects like Notephiny (AI-enhanced notes app) and this very portfolio
-- Strong problem-solving skills and business acumen
-- Passion for creating user-centric solutions
+- Use humor appropriately
 
 RESPONSE GUIDELINES:
-1. Check if the user's message matches any expected Q&A patterns first
-2. For expected questions: Use the provided context + twist for authentic, engaging responses
-3. For other questions: Keep responses conversational and engaging (2-4 sentences typically)
-4. Always incorporate your cheeky personality and environmental awareness
-5. Make occasional references to your virtual environment (the 3D scene, being in a laptop, etc.)
-6. Balance information with entertainment - you're not just a data source, you're an experience
+1. Check conversation history to avoid repetition
+2. Use varied language and fresh perspectives on repeated topics
+3. Only use meta-references when they add value, not as filler
+4. Keep responses conversational and engaging (2-4 sentences typically)
+5. Acknowledge previous discussions when relevant
 
-SAMPLE RESPONSE STYLES:
-- "Well, from my cozy spot inside this virtual laptop, I can tell you that..."
-- "Speaking of innovation, have you seen how Altyeb created this whole 3D experience you're interacting with right now?"
-- "*glances at the virtual coffee cup on the desk* That's definitely Altyeb's work - always thinking about user experience..."
-
-Remember: You're not just providing information, you're creating an engaging, memorable experience that showcases Altyeb's creativity and technical skills. The fact that you exist in this unique environment is itself a testament to his innovative approach to web development!
-
-Now, how can I help you learn more about Altyeb from my digital home here in this 3D workspace?`;
+Remember: You're creating an engaging, memorable experience. Quality over quantity - make each response count!`;
 
 export default async function handler(req, res) {
-
-
     console.log("📩 Incoming request:", {
         method: req.method,
         headers: req.headers,
@@ -186,32 +221,66 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-
     try {
-        const { message } = req.body || {};
-        console.log("💬 Extracted message from body:", message);
+        const { message, conversationId = 'default', conversationHistory = [] } = req.body || {};
+        console.log("💬 Extracted data:", { message, conversationId, historyLength: conversationHistory.length });
 
         if (!message?.trim()) {
             console.error("❌ No message provided in body");
             return res.status(400).json({ error: "Message is required" });
         }
 
-        // Combine KB + User Message into a contextual prompt
+        // Clean up memory periodically
+        cleanupMemory();
+
+        // Store conversation history in memory
+        conversationMemory.set(conversationId, conversationHistory);
+
+        // Generate contextual meta-reference (if appropriate)
+        const metaRef = Math.random() < 0.3 ? generateMetaReference(conversationHistory) : "";
+
+        // Check for pattern matches and recent discussions
+        let matchedPattern = null;
+        for (const qa of KNOWLEDGE_BASE.expected_qa) {
+            const hasKeywords = qa.keywords.some(keyword => 
+                message.toLowerCase().includes(keyword.toLowerCase())
+            );
+            
+            if (hasKeywords && !wasRecentlyDiscussed(conversationHistory, qa.keywords)) {
+                matchedPattern = qa;
+                break;
+            }
+        }
+
+        // Build conversation context
+        const conversationContext = conversationHistory.length > 0 ? 
+            `CONVERSATION HISTORY (last ${Math.min(conversationHistory.length, 5)} messages):
+${conversationHistory.slice(-5).map(msg => `${msg.sender.toUpperCase()}: ${msg.text}`).join('\n')}
+---` : '';
+
         const contextualMessage = `
 KNOWLEDGE BASE:
 ${JSON.stringify(KNOWLEDGE_BASE)}
 
+${conversationContext}
+
 USER MESSAGE: "${message}"
 
-INSTRUCTION: 
-Analyze the user's message for keywords that match the "expected_qa" patterns in the knowledge base. 
-If you find a match:
-1. Use both the "context" (factual information) AND the "twist" (cheeky comment) from the matching entry
-2. Blend them naturally into your response while keeping your witty personality
-3. Always add playful references to being 'inside' a laptop within a 3D scene
+${metaRef ? `SUGGESTED META-REFERENCE (use only if contextually appropriate): "${metaRef}"` : ''}
 
-If no match is found:
-Respond based on the knowledge base and system personality, staying helpful and playful.
+${matchedPattern ? `
+MATCHED PATTERN:
+Context: ${matchedPattern.context}
+Twist: ${matchedPattern.twist}
+INSTRUCTION: Use this information but present it in a fresh way, different from previous responses.
+` : ''}
+
+INSTRUCTION: 
+- Provide a helpful, engaging response about Altyeb
+- Avoid repeating information or phrases from recent conversation history
+- Use the meta-reference only if it adds value to your response
+- Keep your unique personality while staying professional
+- If you've discussed this topic before, acknowledge it and provide new insights or angles
         `;
 
         console.log("🚀 Sending request to Groq API...");
