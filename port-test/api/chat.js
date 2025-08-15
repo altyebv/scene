@@ -1,4 +1,6 @@
-import KNOWLEDGE_BASE from '../data/Knowledge.json';
+import path from 'path';
+import { promises as fs } from 'fs';
+
 
 const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene (complete with a coffee cup, BMW model car, sticky notes, and a Rubik's cube).
 
@@ -45,6 +47,10 @@ Remember: You're not just providing information, you're creating an engaging, me
 Now, how can I help you learn more about Altyeb from my digital home here in this 3D workspace?`;
 
 export default async function handler(req, res) {
+    const filePath = path.join(process.cwd(), 'data', 'Knowledge.json');
+    const fileData = await fs.readFile(filePath, 'utf8');
+    const KNOWLEDGE_BASE = JSON.parse(fileData);
+
     console.log("📩 Incoming request:", {
         method: req.method,
         headers: req.headers,
@@ -55,6 +61,7 @@ export default async function handler(req, res) {
         console.warn("⚠️ Method not allowed:", req.method);
         return res.status(405).json({ error: "Method not allowed" });
     }
+
 
     try {
         const { message } = req.body || {};
