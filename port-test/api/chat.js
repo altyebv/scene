@@ -1,5 +1,4 @@
-// /api/chat.js
-import KNOWLEDGE_BASE from '../data/Knowledge.json'
+import KNOWLEDGE_BASE from '../data/Knowledge.json';
 
 const SYSTEM_PROMPT = `You are an AI assistant embedded in a unique 3D portfolio website. You're literally living inside a simulated Windows desktop that's being projected from a laptop sitting on a virtual 3D desk scene (complete with a coffee cup, BMW model car, sticky notes, and a Rubik's cube).
 
@@ -45,89 +44,12 @@ Remember: You're not just providing information, you're creating an engaging, me
 
 Now, how can I help you learn more about Altyeb from my digital home here in this 3D workspace?`;
 
-// Store conversation history in memory (this will reset with each serverless function instance)
-let conversationStore = new Map();
-
-// Clean up old conversations (basic cleanup)
-const cleanupOldConversations = () => {
-    const now = Date.now();
-    const maxAge = 30 * 60 * 1000; // 30 minutes
-    
-    for (const [sessionId, data] of conversationStore.entries()) {
-        if (now - data.lastActivity > maxAge) {
-            conversationStore.delete(sessionId);
-        }
-    }
-};
-
-// Generate session ID from request info
-const generateSessionId = (req) => {
-    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
-    const userAgent = req.headers['user-agent'] || 'unknown';
-    return `${ip}_${userAgent.slice(0, 50)}`.replace(/[^a-zA-Z0-9_]/g, '_');
-};
-
-// Get or create conversation history
-const getConversationHistory = (sessionId) => {
-    if (!conversationStore.has(sessionId)) {
-        conversationStore.set(sessionId, {
-            history: [],
-            lastActivity: Date.now()
-        });
-    }
-    return conversationStore.get(sessionId);
-};
-
-// Update conversation history
-const updateConversationHistory = (sessionId, userMessage, botResponse) => {
-    const conversation = getConversationHistory(sessionId);
-    conversation.history.push(
-        { role: "user", content: userMessage },
-        { role: "assistant", content: botResponse }
-    );
-    
-    // Keep only last 12 messages (6 exchanges) for context
-    if (conversation.history.length > 12) {
-        conversation.history = conversation.history.slice(-12);
-    }
-    
-    conversation.lastActivity = Date.now();
-};
-
 export default async function handler(req, res) {
-    // Clean up old conversations periodically
-    if (Math.random() < 0.1) { // 10% chance to cleanup on each request
-        cleanupOldConversations();
-    }
-
-    // Set CORS headers for broader compatibility
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    // Handle preflight requests
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
     console.log("📩 Incoming request:", {
         method: req.method,
-        timestamp: new Date().toISOString(),
-        userAgent: req.headers['user-agent']?.substring(0, 50) + '...',
-        hasGroqKey: !!process.env.GROQ_API_KEY
+        headers: req.headers,
+        body: req.body,
     });
-
-    // Test endpoint for GET requests (browser visits)
-    if (req.method === 'GET') {
-        console.log("✅ GET request received - API is working!");
-        return res.status(200).json({
-            message: "Altyeb's Portfolio ChatBot API is working!",
-            timestamp: new Date().toISOString(),
-            environment: process.env.NODE_ENV,
-            status: "online",
-            hasGroqKey: !!process.env.GROQ_API_KEY
-        });
-    }
 
     if (req.method !== "POST") {
         console.warn("⚠️ Method not allowed:", req.method);
@@ -136,52 +58,32 @@ export default async function handler(req, res) {
 
     try {
         const { message } = req.body || {};
-        console.log("💬 Processing message:", message?.substring(0, 100) + '...');
+        console.log("💬 Extracted message from body:", message);
 
         if (!message?.trim()) {
-            console.error("❌ Empty or missing message");
+            console.error("❌ No message provided in body");
             return res.status(400).json({ error: "Message is required" });
         }
 
-        // Check if GROQ_API_KEY exists
-        if (!process.env.GROQ_API_KEY) {
-            console.error("❌ GROQ_API_KEY not found in environment variables");
-            return res.status(200).json({
-                reply: "Hey there! I'm having a bit of trouble connecting to my AI brain right now - looks like my API key got lost in the digital void! 🤖 Could you let Altyeb know his chatbot needs some configuration love? In the meantime, feel free to explore his amazing 3D portfolio!",
-                fallback: true,
-                error: "Missing API key"
-            });
-        }
-
-        // Get session-based conversation history
-        const sessionId = generateSessionId(req);
-        const conversationData = getConversationHistory(sessionId);
-
-        // Enhanced context injection with keyword matching
+        // Combine KB + User Message into a contextual prompt
         const contextualMessage = `
 KNOWLEDGE BASE:
 ${JSON.stringify(KNOWLEDGE_BASE, null, 2)}
 
 USER MESSAGE: "${message}"
 
-INSTRUCTION: Analyze the user's message for keywords that match the expected_qa patterns in the knowledge base. If you find a match:
-1. Use both the "context" (factual information) AND the "twist" (cheeky comment) from the matching expected_qa entry
-2. Blend them naturally into your response while maintaining your witty personality
-3. Make sure to include the playful meta-commentary that makes you unique
+INSTRUCTION: 
+Analyze the user's message for keywords that match the "expected_qa" patterns in the knowledge base. 
+If you find a match:
+1. Use both the "context" (factual information) AND the "twist" (cheeky comment) from the matching entry
+2. Blend them naturally into your response while keeping your witty personality
+3. Always add playful references to being 'inside' a laptop within a 3D scene
 
-If no expected_qa pattern matches, respond normally using the knowledge base while maintaining your personality as described in the system prompt.
+If no match is found:
+Respond based on the knowledge base and system personality, staying helpful and playful.
+        `;
 
-Remember: You're the cheeky AI trapped in this virtual laptop, so always maintain that playful but helpful tone!
-`;
-
-        // Build conversation with system prompt and history
-        const messages = [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...conversationData.history, // Use session-based history
-            { role: "user", content: contextualMessage }
-        ];
-
-        console.log("🚀 Sending request to Groq API with", messages.length, "messages...");
+        console.log("🚀 Sending request to Groq API...");
         const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -189,58 +91,34 @@ Remember: You're the cheeky AI trapped in this virtual laptop, so always maintai
                 "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
             },
             body: JSON.stringify({
-                model: "llama-3.1-70b-versatile", // Upgraded to more capable model
-                messages,
-                temperature: 0.7, // Balanced creativity
-                max_tokens: 500,  // Reasonable response length
-                top_p: 0.9,      // Focused but creative responses
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: SYSTEM_PROMPT },
+                    { role: "user", content: contextualMessage }
+                ],
+                temperature: 0.7,
+                max_tokens: 500,
+                top_p: 0.9,
             }),
         });
 
-        console.log("📡 Groq API response status:", aiResponse.status);
+        console.log("📡 AI API response status:", aiResponse.status);
 
         if (!aiResponse.ok) {
-            const errorData = await aiResponse.text();
-            console.error("❌ Groq API error:", errorData);
-
-            // Fallback response for API failures
-            const fallbackResponse = "Hey there! I'm having a bit of trouble connecting to my AI brain right now (probably too much coffee spilled on the virtual circuits 😅). Could you try asking me again in a moment? I'm eager to tell you all about Altyeb's amazing work!";
-
-            return res.status(200).json({
-                reply: fallbackResponse,
-                fallback: true
-            });
+            const errorText = await aiResponse.text();
+            console.error("❌ AI API returned error:", errorText);
+            return res.status(aiResponse.status).json({ error: errorText });
         }
 
         const data = await aiResponse.json();
-        console.log("✅ Groq API success");
+        console.log("✅ Parsed AI API response:", data);
 
-        const reply = data.choices?.[0]?.message?.content?.trim() ||
-            "Hmm, seems like I'm having a quiet moment here in my virtual space. Could you try asking me something about Altyeb? I'd love to chat!";
+        const reply = data.choices?.[0]?.message?.content?.trim() || "(No response from AI)";
+        console.log("💡 Extracted reply:", reply);
 
-        // Update conversation history
-        updateConversationHistory(sessionId, message, reply);
-
-        // Log successful interaction (without sensitive data)
-        console.log("💡 Response generated successfully, length:", reply.length);
-
-        res.status(200).json({
-            reply,
-            timestamp: new Date().toISOString(),
-            model: "llama-3.1-70b-versatile",
-            sessionId: sessionId.slice(0, 8) + "..." // Partial session ID for debugging
-        });
-
-    } catch (error) {
-        console.error("💥 Serverless function error:", error.message);
-
-        // Friendly error response that maintains character
-        const errorResponse = "Oops! Something went a bit haywire in my digital brain 🤖 *taps virtual screen* Could you try asking me again? I promise I'm usually much more helpful when discussing Altyeb's impressive work!";
-
-        res.status(200).json({
-            reply: errorResponse,
-            error: true,
-            timestamp: new Date().toISOString()
-        });
+        res.status(200).json({ reply });
+    } catch (err) {
+        console.error("💥 Serverless function error:", err);
+        res.status(500).json({ error: err.message });
     }
 }
