@@ -68,7 +68,7 @@ export default async function handler(req, res) {
         // Combine KB + User Message into a contextual prompt
         const contextualMessage = `
 KNOWLEDGE BASE:
-${JSON.stringify(KNOWLEDGE_BASE, null, 2)}
+${JSON.stringify(KNOWLEDGE_BASE)}
 
 USER MESSAGE: "${message}"
 
