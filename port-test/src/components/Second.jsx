@@ -3,7 +3,6 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { FirstPersonControls, OrbitControls, SpotLight, useHelper, useGLTF } from '@react-three/drei';
 import { useRef } from 'react';
 import { SpotLightHelper } from 'three';
-import { useControls } from 'leva'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 
