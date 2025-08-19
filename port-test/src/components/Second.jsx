@@ -1,50 +1,45 @@
-import React, { useState, Suspense, useEffect } from 'react';
+import React, { useState, Suspense, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { FirstPersonControls, OrbitControls, SpotLight, useHelper, useGLTF } from '@react-three/drei';
-import { useRef } from 'react';
-import { SpotLightHelper } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { SpotLightHelper } from 'three';
+import CameraController from './Camera/cameraController'; // 👈 import camera logic
 
 
-
+// ---------------- Box for testing ----------------
 function Box() {
     const boxRef = useRef();
 
     useFrame(() => {
-        boxRef.current.rotation.y += 0.01;
-        boxRef.current.rotation.z += 0.01;
-        boxRef.current.rotation.x += 0.01;
-    })
+        if (boxRef.current) {
+            boxRef.current.rotation.y += 0.01;
+            boxRef.current.rotation.z += 0.01;
+            boxRef.current.rotation.x += 0.01;
+        }
+    });
 
     return (
         <mesh ref={boxRef} position={[0, 0, 0]}>
             <boxGeometry args={[2, 2, 2]} />
             <meshStandardMaterial color={'orange'} />
         </mesh>
-    )
+    );
 }
 
-
+// ---------------- Model ----------------
 function Model() {
     const [error, setError] = useState(null);
-    const { scene } = useGLTF('/models/desk.glb');
-    
+    const { scene } = useGLTF('/models/finale.glb');
+
     useEffect(() => {
-        // Configure Draco decoder
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('/draco/');
         console.log('Draco loader configured');
-
-        return () => {
-            dracoLoader.dispose();
-        };
+        return () => dracoLoader.dispose();
     }, []);
 
     useEffect(() => {
-        if (scene) {
-            console.log('Scene loaded:', scene);
-        }
+        if (scene) console.log('Scene loaded:', scene);
     }, [scene]);
 
     if (error) {
@@ -53,7 +48,7 @@ function Model() {
     }
 
     return (
-        <primitive 
+        <primitive
             object={scene}
             scale={1}
             position={[0, 0, 0]}
@@ -65,43 +60,46 @@ function Model() {
     );
 }
 
-function LightWithHelper() {
-    const light = useRef();
-    const { angle } = useControls({
-        angle: Math.PI / 8
-    });
-
-    useHelper(light, SpotLightHelper, 1, 'hotpink');
-
-    return <SpotLight ref={light}
-        position={[3, 3, 0]}
-        angle={angle}
-        penumbra={1}
-        intensity={80} />
-}
-
-
-
-
+// ---------------- Main Scene ----------------
 function Second() {
+    const [mode, setMode] = useState("idle"); // 👈 camera mode
+
     return (
         <div className='bg-gray-400' style={{ width: '100vw', height: '100vh' }}>
-
             <Canvas camera={{ position: [4, 5, 4], fov: 60 }}>
+                {/* Camera controller handles smooth transitions */}
+                <CameraController mode={mode} />
+
+                {/* Lights */}
                 <directionalLight position={[2, 5, 1]} intensity={2} />
                 <ambientLight intensity={1} />
-                <Suspense fallback={
-                    <mesh>
-                        <boxGeometry args={[1, 1, 1]} />
-                        <meshStandardMaterial color="hotpink" wireframe />
-                    </mesh>
-                }>
+
+                {/* Models */}
+                <Suspense
+                    fallback={
+                        <mesh>
+                            <boxGeometry args={[1, 1, 1]} />
+                            <meshStandardMaterial color="hotpink" wireframe />
+                        </mesh>
+                    }
+                >
+                    {/* <Lap /> */}
                     <Model />
+                    {/* <Box /> Uncomment to test */}
                 </Suspense>
-                <OrbitControls makeDefault />
+
+                {/* Orbit controls only in desk mode */}
+                {mode === "desk" && <OrbitControls enableZoom={true} />}
             </Canvas>
+
+            {/* Debug UI */}
+            <div className='bg-zinc-700 px-3 py-1 gap-1.5' style={{ position: "absolute", top: 20, left: 20, display: "flex", gap: "10px" }}>
+                <button className='bg-zinc-200/65 rounded-md p-1 hover:text-amber-200' onClick={() => setMode("idle")}>Idle</button>
+                <button className='bg-zinc-200/65 rounded-md p-1 hover:text-amber-200' onClick={() => setMode("desk")}>Desk</button>
+                <button className='bg-zinc-200/65 rounded-md p-1 hover:text-amber-200' onClick={() => setMode("laptop")}>Laptop</button>
+            </div>
         </div>
-    )
+    );
 }
 
 export default Second;
