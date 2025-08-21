@@ -10,7 +10,7 @@ export default function CameraController({ mode }) {
     const configs = {
         idle: { position: [0, 3, 8], lookAt: [0, 1, 0], fov: 50 },
         desk: { position: [-1.9, 6, 1], lookAt: [2, 1, 1], fov: 30 },
-        laptop: { position: [-1.1, 1.9, 1.9], lookAt: [6, -2, -4], fov: 60 },
+        laptop: { position: [-0.36, 2.08, 0.58], lookAt: [4.4, -1, -4], fov: 45 },
     };
 
     useEffect(() => {

@@ -4,6 +4,7 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { SpotLightHelper } from 'three';
 import CameraController from './Camera/cameraController'; // 👈 import camera logic
+import OS from './Os'
 
 
 // ---------------- Box for testing ----------------
@@ -84,6 +85,7 @@ function Second() {
                     }
                 >
                     {/* <Lap /> */}
+                    <OS/>
                     <Model />
                     {/* <Box /> Uncomment to test */}
                 </Suspense>
