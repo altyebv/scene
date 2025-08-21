@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
-import Desktop from '../temp/Desk';
+import Desktop from './Desk';
 
 function LaptopModel({ modelPath = '/models/final_lap.glb', onMeshesFound }) {
     const [loadingError, setLoadingError] = useState(null);
