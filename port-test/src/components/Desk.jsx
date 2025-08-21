@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { icons } from '../assets/icons';
 import { ChromeContent, VsCode, TeamsApp, CVApp, PyCharmApp, FileExplorerApp, RecycleBinApp, SpotifyApp } from '../components/AppsContent';
 import ChatBot from '../components/Chatbot';
-import Window from '../temp/Window';
+import Window from './Window';
 
 function QuickSettings({ isOpen, onClose, width, height }) {
     const [volume, setVolume] = useState(75);
